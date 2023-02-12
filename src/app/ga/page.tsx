@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 // Initialize the checkboard
 const rows = 10;
@@ -79,27 +79,25 @@ const Checkboard = () => {
     const chromosomes = Array(20)
       .fill(null)
       .map(() => createCheckboard());
-    setCheckboard(geneticAlgorithm(chromosomes, 1000));
+
+    const solvedCheckboard = geneticAlgorithm(chromosomes, 100);
+    setCheckboard(solvedCheckboard);
   };
-
-  useEffect(()=>{
-
-  },[])
-
+  console.log(checkboard);
   return (
     <div>
+      <button onClick={handleSolve}>Solve</button>
       <table>
         <tbody>
           {checkboard.map((row, i) => (
             <tr key={i}>
               {row.map((color, j) => (
-                <td key={j} />
+                <td key={j} style={{ backgroundColor: `hsl(${color * 60}, 100%, 50%)` }} >{"   tttttt  "}</td>
               ))}
             </tr>
           ))}
         </tbody>
       </table>
-      <button onClick={handleSolve}>Solve</button>
     </div>
   );
 };
