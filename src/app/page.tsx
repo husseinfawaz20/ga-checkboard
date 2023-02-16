@@ -8,6 +8,8 @@ const GA = () => {
   const [initialPopulation, setinitialPopulation] = useState<any[]>([]);
   const [ancestorMatrix, setAncestorMatrix] = useState<any>();
   const [show, setShow] = useState<boolean>(true);
+  const [disableGen, setDisableGen] = useState<boolean>(false);
+
   const populationSize = 1;
 
   const ancestorInitialization = () => {
@@ -99,6 +101,7 @@ const GA = () => {
 
   const handleStart = () => {
     ancestorInitialization();
+    setDisableGen(true);
   };
 
   const handleSolve = () => {
@@ -110,18 +113,20 @@ const GA = () => {
     setColorNumber(value);
     setAncestorMatrix(null);
     setinitialPopulation([]);
+    setDisableGen(false);
   };
   const changeDimension = (value: any) => {
     setCheckBoardSize(value);
     setAncestorMatrix(null);
     setinitialPopulation([]);
+    setDisableGen(false);
   };
   return (
     <div>
       <TextField label="Colors" variant="outlined" onChange={(e) => changeColor(e.target.value)} />
       <TextField label="Dimension (nxn)" variant="outlined" onChange={(e) => changeDimension(e.target.value)} />
 
-      <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" onClick={handleStart}>
+      <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" onClick={handleStart} disabled={disableGen}>
         Generate
       </Button>
 
