@@ -3,8 +3,8 @@ import { Box, Button, Grid, Table, TableBody, TableCell, TableRow, TextField } f
 import React, { useEffect, useState } from "react";
 
 const GA = () => {
-  const [checkBoardSize, setCheckBoardSize] = useState<number>(5);
-  const [colorNumber, setColorNumber] = useState<number>(5);
+  const [checkBoardSize, setCheckBoardSize] = useState<number>(0);
+  const [colorNumber, setColorNumber] = useState<number>(0);
   const [initialPopulation, setinitialPopulation] = useState<any[]>([]);
   const [ancestorMatrix, setAncestorMatrix] = useState<any>();
   const [show, setShow] = useState<boolean>(true);
@@ -90,24 +90,43 @@ const GA = () => {
     return neighborNumber;
   };
 
-  useEffect(() => {
-    ancestorInitialization();
-    // console.log("ancestorMatrix", initialPopulation);
-  }, []);
+  // useEffect(() => {
+  //   ancestorInitialization();
+  //   // console.log("ancestorMatrix", initialPopulation);
+  // }, []);
 
-  useEffect(() => {
-    console.log("generating...");
-  }, [show]);
+  useEffect(() => {}, [show]);
+
+  const handleStart = () => {
+    ancestorInitialization();
+  };
 
   const handleSolve = () => {
     setShow(!show);
     generateInitialPopulation(ancestorMatrix);
   };
 
+  const changeColor = (value: any) => {
+    setColorNumber(value);
+    setAncestorMatrix(null);
+    setinitialPopulation([]);
+  };
+  const changeDimension = (value: any) => {
+    setCheckBoardSize(value);
+    setAncestorMatrix(null);
+    setinitialPopulation([]);
+  };
   return (
     <div>
-      <Button sx={{ paddingTop: 3 }} variant="contained" onClick={handleSolve}>
+      <TextField label="Colors" variant="outlined" onChange={(e) => changeColor(e.target.value)} />
+      <TextField label="Dimension (nxn)" variant="outlined" onChange={(e) => changeDimension(e.target.value)} />
+
+      <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" onClick={handleStart}>
         Generate
+      </Button>
+
+      <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" onClick={handleSolve}>
+        Next Iteration
       </Button>
       {initialPopulation.length > 0 ? (
         <Table>
