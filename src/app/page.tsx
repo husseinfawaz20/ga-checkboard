@@ -92,13 +92,6 @@ const GA = () => {
     return neighborNumber;
   };
 
-  // useEffect(() => {
-  //   ancestorInitialization();
-  //   // console.log("ancestorMatrix", initialPopulation);
-  // }, []);
-
-  useEffect(() => {}, [show]);
-
   const handleStart = () => {
     ancestorInitialization();
     setDisableGen(true);
