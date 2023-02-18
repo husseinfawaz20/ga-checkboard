@@ -256,7 +256,7 @@ const GA = () => {
           <TableBody>
             <Grid container>
               {initialPopulation?.map((item, index) => (
-                <Grid item md={checkBoardSize > 5 ? 5 : 4} key={index} sx={{ padding: 5 }}>
+                <Grid item md={checkBoardSize > 5 ? 5 : 3} key={index} sx={{ padding: 3 }}>
                   {item?.checkBoard?.map((row, i) => (
                     <TableRow key={i}>
                       {row.map((color, j) => {
