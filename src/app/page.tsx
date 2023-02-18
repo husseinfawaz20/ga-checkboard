@@ -47,6 +47,9 @@ const GA = () => {
       initialPopulation.push(getRandomcheckBoard(ancestor));
       // console.log("initialPopulation" + index, initialPopulation[index]);
     }
+
+    //sort the population desc by fitness
+    initialPopulation.sort((a,b) => b.fitness-a.fitness);
   };
 
   const getRandomcheckBoard = (ancestorMatrix: any) => {
@@ -92,6 +95,72 @@ const GA = () => {
     return neighborNumber;
   };
 
+
+  const populationCrosseOver=()=>{
+    let crosseOverPopulation =initialPopulation.slice(0,initialPopulation.length)
+    for(let i=0;i<crosseOverPopulation.length-1;i++)
+    {
+      for(let j=i+1;j<crosseOverPopulation.length;j++)
+      {
+        const checkBoard=coupleCrossOver(crosseOverPopulation[i],crosseOverPopulation[j]);
+        const fitness = getFitness(checkBoard);
+        initialPopulation.push({checkBoard,fitness});
+      }
+    }
+    initialPopulation.sort((a,b) => b.fitness-a.fitness);
+  };
+
+  const coupleCrossOver=(parent1,parent2)=>{
+
+    const midpoint = Math.floor(parent1.length / 2);
+    const parent1Chr = parent1.splice(0, midpoint);
+    const parent2Chr = parent2.splice(midpoint,parent1.length);
+    let child=  parent1Chr.concat(parent2Chr);    
+    child=reformatChild(child);
+    
+  }
+
+  const reformatChild=(child) =>{
+    let colors:number[]=new Array(colorNumber).fill(checkBoardSize*checkBoardSize/colorNumber);
+
+    for(let i=0;i<checkBoardSize;i++)
+      for(let j=0;j<checkBoardSize;j++){
+        colors[child[i][j]]--;
+      }
+    let goodformat=true;
+    for(let i=0;i<colors.length;i++)
+    {
+      if(colors[i]!=0)
+      {
+        goodformat=false;
+        break;
+      }
+    }
+    if(!goodformat)
+    {
+      for(let i=0;i<checkBoardSize;i++)
+      {
+        for(let j=0;j<checkBoardSize;j++)
+        {
+          if(colors[child[i][j]]<0)
+          {
+            for(let index=0;index<colors.length;i++)
+            {
+              if(index!=child[i][j] && colors[index]>0)
+              {
+                colors[child[i][j]]++;
+                colors[index]--;
+                child[i][j]=index;
+                break;
+              }
+            }
+          }
+        }  
+      }
+    }
+  return child;
+  }
+  
   const handleStart = () => {
     ancestorInitialization();
     setDisableGen(true);
