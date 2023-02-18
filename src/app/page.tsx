@@ -3,14 +3,14 @@ import { Box, Button, Grid, Table, TableBody, TableCell, TableRow, TextField } f
 import React, { useEffect, useState } from "react";
 
 const GA = () => {
-  const [checkBoardSize, setCheckBoardSize] = useState<number>(0);
-  const [colorNumber, setColorNumber] = useState<number>(0);
+  const [checkBoardSize, setCheckBoardSize] = useState<number>(5);
+  const [colorNumber, setColorNumber] = useState<number>(5);
   const [initialPopulation, setinitialPopulation] = useState<any[]>([]);
+  const [childrenPopulation, setchildrenPopulation] = useState<any[]>([]);
   const [ancestorMatrix, setAncestorMatrix] = useState<any>();
   const [show, setShow] = useState<boolean>(true);
   const [disableGen, setDisableGen] = useState<boolean>(false);
-
-  const populationSize = 1;
+  const [populationSize, setPopulationSize] = useState<number>(1);
 
   const ancestorInitialization = () => {
     let i, j;
@@ -45,11 +45,9 @@ const GA = () => {
   const generateInitialPopulation = (ancestor: any) => {
     for (let index = 0; index < populationSize; index++) {
       initialPopulation.push(getRandomcheckBoard(ancestor));
-      // console.log("initialPopulation" + index, initialPopulation[index]);
     }
 
-    //sort the population desc by fitness
-    initialPopulation.sort((a,b) => b.fitness-a.fitness);
+    initialPopulation.sort((a, b) => a.fitness - b.fitness);
   };
 
   const getRandomcheckBoard = (ancestorMatrix: any) => {
@@ -95,72 +93,112 @@ const GA = () => {
     return neighborNumber;
   };
 
+  const populationCrossOver = () => {
+    var ip = JSON.parse(JSON.stringify(initialPopulation));
+    const crosseOverPopulation = ip.slice(0, 2);
 
-  const populationCrosseOver=()=>{
-    let crosseOverPopulation =initialPopulation.slice(0,initialPopulation.length)
-    for(let i=0;i<crosseOverPopulation.length-1;i++)
-    {
-      for(let j=i+1;j<crosseOverPopulation.length;j++)
-      {
-        const checkBoard=coupleCrossOver(crosseOverPopulation[i],crosseOverPopulation[j]);
+    for (let i = 0; i < crosseOverPopulation.length - 1; i++) {
+      for (let j = i + 1; j < crosseOverPopulation.length; j++) {
+        const checkBoard = coupleCrossOver(crosseOverPopulation[i], crosseOverPopulation[j]);
         const fitness = getFitness(checkBoard);
-        initialPopulation.push({checkBoard,fitness});
+        initialPopulation.push({ checkBoard, fitness });
+        childrenPopulation.push({ checkBoard, fitness });
       }
     }
-    initialPopulation.sort((a,b) => b.fitness-a.fitness);
+    initialPopulation.sort((a, b) => a.fitness - b.fitness);
   };
 
-  const coupleCrossOver=(parent1,parent2)=>{
+  function normalizeMatrix(matrix: number[][]): number[][] {
+    const counts: { [key: number]: number } = {};
+    let maxCount = 0;
 
-    const midpoint = Math.floor(parent1.length / 2);
-    const parent1Chr = parent1.splice(0, midpoint);
-    const parent2Chr = parent2.splice(midpoint,parent1.length);
-    let child=  parent1Chr.concat(parent2Chr);    
-    child=reformatChild(child);
-    
+    // Step 1: Count the number of occurrences of each value
+    for (const row of matrix) {
+      for (const value of row) {
+        counts[value] = (counts[value] ?? 0) + 1;
+        maxCount = Math.max(maxCount, counts[value]);
+      }
+    }
+
+    // Step 2: Modify the matrix to ensure each value occurs exactly maxCount times
+    const newMatrix: number[][] = Array.from({ length: matrix.length }, () => []);
+    for (let row = 0; row < matrix.length; row++) {
+      for (let col = 0; col < matrix[0].length; col++) {
+        const value = matrix[row][col];
+        newMatrix[row][col] = value;
+
+        // Step 4: Replace values that occur less than maxCount times
+        if (counts[value] < maxCount) {
+          const diff = maxCount - counts[value];
+          for (let i = 0; i < diff; i++) {
+            let newRow: number, newCol: number;
+            do {
+              newRow = Math.floor(Math.random() * matrix.length);
+              newCol = Math.floor(Math.random() * matrix[0].length);
+            } while (newMatrix[newRow][newCol] === value);
+            newMatrix[newRow][newCol] = value;
+          }
+        }
+      }
+    }
+
+    return newMatrix;
   }
 
-  const reformatChild=(child) =>{
-    let colors:number[]=new Array(colorNumber).fill(checkBoardSize*checkBoardSize/colorNumber);
+  const coupleCrossOver = (parent1, parent2) => {
+    let child = [];
+    const midpoint = Math.floor(parent1?.checkBoard.length / 2);
+    const parent1Chr = parent1?.checkBoard.splice(0, midpoint);
+    const parent2Chr = parent2?.checkBoard.splice(midpoint, parent2?.checkBoard.length);
+    child = parent1Chr.concat(parent2Chr);
 
-    for(let i=0;i<checkBoardSize;i++)
-      for(let j=0;j<checkBoardSize;j++){
+    let colors: number[] = new Array(colorNumber).fill((checkBoardSize * checkBoardSize) / colorNumber);
+    function count(array) {
+      return array
+        .flat()
+        .join(" ")
+        .split(" ")
+        .reduce((acc, word) => {
+          acc[word] = acc[word] !== undefined ? acc[word] + 1 : 1;
+          return acc;
+        }, {});
+    }
+
+    const color = count(child);
+
+    for (let i = 0; i < checkBoardSize; i++)
+      for (let j = 0; j < checkBoardSize; j++) {
         colors[child[i][j]]--;
       }
-    let goodformat=true;
-    for(let i=0;i<colors.length;i++)
-    {
-      if(colors[i]!=0)
-      {
-        goodformat=false;
+
+    let goodformat = true;
+    for (let i = 0; i < colors.length; i++) {
+      if (colors[i] != 0) {
+        goodformat = false;
         break;
       }
     }
-    if(!goodformat)
-    {
-      for(let i=0;i<checkBoardSize;i++)
-      {
-        for(let j=0;j<checkBoardSize;j++)
-        {
-          if(colors[child[i][j]]<0)
-          {
-            for(let index=0;index<colors.length;i++)
-            {
-              if(index!=child[i][j] && colors[index]>0)
-              {
-                colors[child[i][j]]++;
+    if (!goodformat) {
+      for (let i = 0; i < child.length; i++) {
+        for (let j = 0; j < child[i].length; j++) {
+          if (colors[child[i][j!]] < 0) {
+            for (let index = 0; index < colors.length; index++) {
+              const ind = j;
+              console.log("child i j", child[i][ind!], i, j, child);
+              if (index != child[i][ind!] && colors[index] > 0) {
+                colors[child[i][ind!]]++;
                 colors[index]--;
-                child[i][j]=index;
+                child[i][ind] = index;
                 break;
               }
             }
           }
-        }  
+        }
       }
     }
-  return child;
-  }
-  
+    return child;
+  };
+
   const handleStart = () => {
     ancestorInitialization();
     setDisableGen(true);
@@ -183,10 +221,23 @@ const GA = () => {
     setinitialPopulation([]);
     setDisableGen(false);
   };
+
+  const changePopulation = (value: any) => {
+    setPopulationSize(value);
+    setAncestorMatrix(null);
+    setinitialPopulation([]);
+    setDisableGen(false);
+  };
+
+  const handleCrossover = () => {
+    populationCrossOver();
+  };
+
   return (
     <div>
       <TextField label="Colors" variant="outlined" onChange={(e) => changeColor(e.target.value)} />
       <TextField label="Dimension (nxn)" variant="outlined" onChange={(e) => changeDimension(e.target.value)} />
+      <TextField label="Population" variant="outlined" onChange={(e) => changePopulation(e.target.value)} />
 
       <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" onClick={handleStart} disabled={disableGen}>
         Generate
@@ -195,12 +246,17 @@ const GA = () => {
       <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" onClick={handleSolve}>
         Next Iteration
       </Button>
+
+      <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" onClick={handleCrossover}>
+        Crossover
+      </Button>
+
       {initialPopulation.length > 0 ? (
         <Table>
           <TableBody>
-            <Grid container sx={{ justifyContent: "space-between" }}>
+            <Grid container>
               {initialPopulation?.map((item, index) => (
-                <Grid item md={4} key={index} sx={{ padding: 5 }}>
+                <Grid item md={checkBoardSize > 5 ? 5 : 4} key={index} sx={{ padding: 5 }}>
                   {item?.checkBoard?.map((row, i) => (
                     <TableRow key={i}>
                       {row.map((color, j) => {
