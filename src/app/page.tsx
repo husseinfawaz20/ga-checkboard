@@ -45,9 +45,11 @@ const GA = () => {
   const generateInitialPopulation = (ancestor: any) => {
     for (let index = 0; index < populationSize; index++) {
       initialPopulation.push(getRandomcheckBoard(ancestor));
+      childrenPopulation.push(getRandomcheckBoard(ancestor));
     }
 
     initialPopulation.sort((a, b) => a.fitness - b.fitness);
+    childrenPopulation.sort((a, b) => a.fitness - b.fitness);
   };
 
   const getRandomcheckBoard = (ancestorMatrix: any) => {
@@ -96,7 +98,7 @@ const GA = () => {
   const populationCrossOver = () => {
     var ip = JSON.parse(JSON.stringify(initialPopulation));
     const crosseOverPopulation = ip.slice(0, 2);
-     console.log("cr",crosseOverPopulation)
+    console.log("crosseOverPopulation,",crosseOverPopulation)
     for (let i = 0; i < crosseOverPopulation.length - 1; i++) {
       for (let j = i + 1; j < crosseOverPopulation.length; j++) {
         const checkBoard = coupleCrossOver(crosseOverPopulation[i], crosseOverPopulation[j]);
@@ -106,26 +108,26 @@ const GA = () => {
       }
     }
     initialPopulation.sort((a, b) => a.fitness - b.fitness);
+    childrenPopulation.sort((a, b) => a.fitness - b.fitness);
   };
 
   const coupleCrossOver = (parent1, parent2) => {
     let child = [];
-    
+
     const crossOverPoint = Math.floor(Math.floor(Math.random() * parent1?.checkBoard.length));
     let parent1Chr = parent1?.checkBoard.splice(0, crossOverPoint);
     let parent2Chr = parent2?.checkBoard.splice(crossOverPoint, parent2?.checkBoard.length);
-    
-    if(Math.random()>0.5){
-      const tempParent=parent1Chr;
-      parent1Chr=parent2Chr;
-      parent2Chr=tempParent;
+
+    if (Math.random() > 0.5) {
+      const tempParent = parent1Chr;
+      parent1Chr = parent2Chr;
+      parent2Chr = tempParent;
     }
-    
+
     // parent Permutation
-    if(Math.random()<0.1)
-    {
-      parent1Chr=permutate(parent1Chr);
-      parent2Chr=permutate(parent2Chr);
+    if (Math.random() < 0.1) {
+      parent1Chr = permutate(parent1Chr);
+      parent2Chr = permutate(parent2Chr);
     }
 
     child = parent1Chr.concat(parent2Chr);
@@ -193,21 +195,20 @@ const GA = () => {
         }
       }
     }
-    console.log(child)
     return child;
   };
 
-  const permutate = (checkBoard)=>{
 
+  const permutate = (checkBoard) => {
     for (let i = 0; i < checkBoard.length - 1; i++) {
-      for (let j = i + 1; j < checkBoard.length-1; j++) {
-        let temp=checkBoard[i][j];
-        checkBoard[i][j]=checkBoard[i+1][j+1];
-        checkBoard[i+1][j+1]=temp;
+      for (let j = i + 1; j < checkBoard.length - 1; j++) {
+        let temp = checkBoard[i][j];
+        checkBoard[i][j] = checkBoard[i + 1][j + 1];
+        checkBoard[i + 1][j + 1] = temp;
       }
     }
     return checkBoard;
-  }
+  };
 
   const handleStart = () => {
     ancestorInitialization();
@@ -224,16 +225,33 @@ const GA = () => {
     populationCrossOver();
   };
 
+  const handleAutomatedCrossover = () => {
+    setShow(!show);
+    for (let i = 0; i < 100; i++) {
+      populationCrossOver();
+      console.log("ip", initialPopulation);
+      if (initialPopulation[i].fitness === 0) break;
+    }
+  };
+  const handleClear = () => {
+    setAncestorMatrix(null);
+    setinitialPopulation([]);
+    setchildrenPopulation([])
+    setDisableGen(false);
+  };
+
   const changeColor = (value: any) => {
     setColorNumber(value);
     setAncestorMatrix(null);
     setinitialPopulation([]);
+    setchildrenPopulation([])
     setDisableGen(false);
   };
   const changeDimension = (value: any) => {
     setCheckBoardSize(value);
     setAncestorMatrix(null);
     setinitialPopulation([]);
+    setchildrenPopulation([])
     setDisableGen(false);
   };
 
@@ -241,10 +259,9 @@ const GA = () => {
     setPopulationSize(value);
     setAncestorMatrix(null);
     setinitialPopulation([]);
+    setchildrenPopulation([])
     setDisableGen(false);
   };
-
-
 
   return (
     <div>
@@ -260,10 +277,22 @@ const GA = () => {
         Next Iteration
       </Button>
 
-      <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" onClick={handleCrossover}>
+      <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" color="success" onClick={handleCrossover}>
         Crossover
       </Button>
 
+      <Button
+        sx={{ paddingTop: 3, marginLeft: 5 }}
+        variant="contained"
+        color="success"
+        onClick={handleAutomatedCrossover}
+      >
+        Automated Crossover
+      </Button>
+
+      <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" color="error" onClick={handleClear}>
+        Clear All
+      </Button>
       {initialPopulation.length > 0 ? (
         <Table>
           <TableBody>
