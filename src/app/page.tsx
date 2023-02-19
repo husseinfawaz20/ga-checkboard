@@ -108,43 +108,6 @@ const GA = () => {
     initialPopulation.sort((a, b) => a.fitness - b.fitness);
   };
 
-  function normalizeMatrix(matrix: number[][]): number[][] {
-    const counts: { [key: number]: number } = {};
-    let maxCount = 0;
-
-    // Step 1: Count the number of occurrences of each value
-    for (const row of matrix) {
-      for (const value of row) {
-        counts[value] = (counts[value] ?? 0) + 1;
-        maxCount = Math.max(maxCount, counts[value]);
-      }
-    }
-
-    // Step 2: Modify the matrix to ensure each value occurs exactly maxCount times
-    const newMatrix: number[][] = Array.from({ length: matrix.length }, () => []);
-    for (let row = 0; row < matrix.length; row++) {
-      for (let col = 0; col < matrix[0].length; col++) {
-        const value = matrix[row][col];
-        newMatrix[row][col] = value;
-
-        // Step 4: Replace values that occur less than maxCount times
-        if (counts[value] < maxCount) {
-          const diff = maxCount - counts[value];
-          for (let i = 0; i < diff; i++) {
-            let newRow: number, newCol: number;
-            do {
-              newRow = Math.floor(Math.random() * matrix.length);
-              newCol = Math.floor(Math.random() * matrix[0].length);
-            } while (newMatrix[newRow][newCol] === value);
-            newMatrix[newRow][newCol] = value;
-          }
-        }
-      }
-    }
-
-    return newMatrix;
-  }
-
   const coupleCrossOver = (parent1, parent2) => {
     let child = [];
     const midpoint = Math.floor(parent1?.checkBoard.length / 2);
