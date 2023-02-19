@@ -96,7 +96,7 @@ const GA = () => {
   const populationCrossOver = () => {
     var ip = JSON.parse(JSON.stringify(initialPopulation));
     const crosseOverPopulation = ip.slice(0, 2);
-
+     console.log("cr",crosseOverPopulation)
     for (let i = 0; i < crosseOverPopulation.length - 1; i++) {
       for (let j = i + 1; j < crosseOverPopulation.length; j++) {
         const checkBoard = coupleCrossOver(crosseOverPopulation[i], crosseOverPopulation[j]);
@@ -107,43 +107,6 @@ const GA = () => {
     }
     initialPopulation.sort((a, b) => a.fitness - b.fitness);
   };
-
-  function normalizeMatrix(matrix: number[][]): number[][] {
-    const counts: { [key: number]: number } = {};
-    let maxCount = 0;
-
-    // Step 1: Count the number of occurrences of each value
-    for (const row of matrix) {
-      for (const value of row) {
-        counts[value] = (counts[value] ?? 0) + 1;
-        maxCount = Math.max(maxCount, counts[value]);
-      }
-    }
-
-    // Step 2: Modify the matrix to ensure each value occurs exactly maxCount times
-    const newMatrix: number[][] = Array.from({ length: matrix.length }, () => []);
-    for (let row = 0; row < matrix.length; row++) {
-      for (let col = 0; col < matrix[0].length; col++) {
-        const value = matrix[row][col];
-        newMatrix[row][col] = value;
-
-        // Step 4: Replace values that occur less than maxCount times
-        if (counts[value] < maxCount) {
-          const diff = maxCount - counts[value];
-          for (let i = 0; i < diff; i++) {
-            let newRow: number, newCol: number;
-            do {
-              newRow = Math.floor(Math.random() * matrix.length);
-              newCol = Math.floor(Math.random() * matrix[0].length);
-            } while (newMatrix[newRow][newCol] === value);
-            newMatrix[newRow][newCol] = value;
-          }
-        }
-      }
-    }
-
-    return newMatrix;
-  }
 
   const coupleCrossOver = (parent1, parent2) => {
     let child = [];
@@ -182,20 +145,40 @@ const GA = () => {
       for (let i = 0; i < child.length; i++) {
         for (let j = 0; j < child[i].length; j++) {
           if (colors[child[i][j!]] < 0) {
+            let secondRound = false;
             for (let index = 0; index < colors.length; index++) {
-              const ind = j;
-              console.log("child i j", child[i][ind!], i, j, child);
-              if (index != child[i][ind!] && colors[index] > 0) {
-                colors[child[i][ind!]]++;
-                colors[index]--;
-                child[i][ind] = index;
+              if (index != child[i][j] && colors[index] > 0) {
+                let neighbors = [];
+                if (i != 0) {
+                  neighbors.push(child[i - 1][j]);
+                }
+                if (i != child.length - 1) {
+                  neighbors.push(child[i + 1][j]);
+                }
+                if (j != 0) {
+                  neighbors.push(child[i][j - 1]);
+                }
+                if (j != child[i].length - 1) {
+                  neighbors.push(child[i][j + 1]);
+                }
+                if (neighbors.includes(index) || secondRound) {
+                  colors[child[i][j]]++;
+                  colors[index]--;
+                  child[i][j] = index;
+                }
                 break;
+              }
+
+              if (index == colors.length - 1 && secondRound == false) {
+                index = 0;
+                secondRound = false;
               }
             }
           }
         }
       }
     }
+    console.log(child)
     return child;
   };
 
@@ -207,6 +190,11 @@ const GA = () => {
   const handleSolve = () => {
     setShow(!show);
     generateInitialPopulation(ancestorMatrix);
+  };
+
+  const handleCrossover = () => {
+    setShow(!show);
+    populationCrossOver();
   };
 
   const changeColor = (value: any) => {
@@ -229,9 +217,7 @@ const GA = () => {
     setDisableGen(false);
   };
 
-  const handleCrossover = () => {
-    populationCrossOver();
-  };
+
 
   return (
     <div>
