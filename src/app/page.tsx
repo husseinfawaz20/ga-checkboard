@@ -2,7 +2,8 @@
 import { Alert, Box, Button, Grid, Table, TableBody, TableCell, TableRow, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
+
 const GA = () => {
   const [checkBoardSize, setCheckBoardSize] = useState<number>(5);
   const [colorNumber, setColorNumber] = useState<number>(5);
@@ -146,8 +147,7 @@ const GA = () => {
     }
     if (!goodformat) {
       for (let i = 0; i < child.length; i++) {
-        for (let j = 0; j < child[i].length; j++) { 
-
+        for (let j = 0; j < child[i].length; j++) {
           if (colors[child[i][j!]] < 0) {
             let secondRound = false;
             for (let index = 0; index < colors.length; index++) {
