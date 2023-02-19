@@ -1,16 +1,15 @@
 "use client";
-import { Box, Button, Grid, Table, TableBody, TableCell, TableRow, TextField } from "@mui/material";
+import { Alert, Box, Button, Grid, Table, TableBody, TableCell, TableRow, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 const GA = () => {
   const [checkBoardSize, setCheckBoardSize] = useState<number>(5);
   const [colorNumber, setColorNumber] = useState<number>(5);
   const [initialPopulation, setinitialPopulation] = useState<any[]>([]);
-  const [childrenPopulation, setchildrenPopulation] = useState<any[]>([]);
   const [ancestorMatrix, setAncestorMatrix] = useState<any>();
   const [show, setShow] = useState<boolean>(true);
   const [disableGen, setDisableGen] = useState<boolean>(false);
-  const [populationSize, setPopulationSize] = useState<number>(1);
+  const [populationSize, setPopulationSize] = useState<number>(2);
 
   const ancestorInitialization = () => {
     let i, j;
@@ -33,8 +32,6 @@ const GA = () => {
           }
         }
       }
-      // console.log(ancestor);
-
       generateInitialPopulation(ancestor);
       setAncestorMatrix(ancestor);
     } else {
@@ -94,15 +91,16 @@ const GA = () => {
   };
 
   const populationCrossOver = () => {
-    var ip = JSON.parse(JSON.stringify(initialPopulation));
-    const crosseOverPopulation = ip.slice(0, 2);
-     console.log("cr",crosseOverPopulation)
+    let crosseOverPopulation = [];
+    for (let i = 0; i < populationSize; i++) {
+      crosseOverPopulation.push(initialPopulation[i]);
+    }
+    // console.log("crosseOverPopulation,", crosseOverPopulation);
     for (let i = 0; i < crosseOverPopulation.length - 1; i++) {
       for (let j = i + 1; j < crosseOverPopulation.length; j++) {
         const checkBoard = coupleCrossOver(crosseOverPopulation[i], crosseOverPopulation[j]);
         const fitness = getFitness(checkBoard);
         initialPopulation.push({ checkBoard, fitness });
-        childrenPopulation.push({ checkBoard, fitness });
       }
     }
     initialPopulation.sort((a, b) => a.fitness - b.fitness);
@@ -110,24 +108,27 @@ const GA = () => {
 
   const coupleCrossOver = (parent1, parent2) => {
     let child = [];
-    const midpoint = Math.floor(parent1?.checkBoard.length / 2);
-    const parent1Chr = parent1?.checkBoard.splice(0, midpoint);
-    const parent2Chr = parent2?.checkBoard.splice(midpoint, parent2?.checkBoard.length);
+    let parent1CheckBoard: any = JSON.parse(JSON.stringify(parent1));
+    let parent2CheckBoard: any = JSON.parse(JSON.stringify(parent2));
+
+    const crossOverPoint = Math.floor(Math.floor(Math.random() * parent1?.checkBoard.length));
+    let parent1Chr = parent1CheckBoard?.checkBoard.splice(0, crossOverPoint);
+    let parent2Chr = parent2CheckBoard?.checkBoard.splice(crossOverPoint, parent2?.checkBoard.length);
+    if (Math.random() > 0.5) {
+      const tempParent = parent1Chr;
+      parent1Chr = parent2Chr;
+      parent2Chr = tempParent;
+    }
+
+    // parent Permutation
+    if (Math.random() < 0.1) {
+      parent1Chr = permutate(parent1Chr);
+      parent2Chr = permutate(parent2Chr);
+    }
+
     child = parent1Chr.concat(parent2Chr);
 
     let colors: number[] = new Array(colorNumber).fill((checkBoardSize * checkBoardSize) / colorNumber);
-    function count(array) {
-      return array
-        .flat()
-        .join(" ")
-        .split(" ")
-        .reduce((acc, word) => {
-          acc[word] = acc[word] !== undefined ? acc[word] + 1 : 1;
-          return acc;
-        }, {});
-    }
-
-    const color = count(child);
 
     for (let i = 0; i < checkBoardSize; i++)
       for (let j = 0; j < checkBoardSize; j++) {
@@ -178,8 +179,18 @@ const GA = () => {
         }
       }
     }
-    console.log(child)
     return child;
+  };
+
+  const permutate = (checkBoard) => {
+    for (let i = 0; i < checkBoard.length - 1; i++) {
+      for (let j = i + 1; j < checkBoard.length - 1; j++) {
+        let temp = checkBoard[i][j];
+        checkBoard[i][j] = checkBoard[i + 1][j + 1];
+        checkBoard[i + 1][j + 1] = temp;
+      }
+    }
+    return checkBoard;
   };
 
   const handleStart = () => {
@@ -187,14 +198,25 @@ const GA = () => {
     setDisableGen(true);
   };
 
-  const handleSolve = () => {
-    setShow(!show);
-    generateInitialPopulation(ancestorMatrix);
-  };
-
   const handleCrossover = () => {
     setShow(!show);
     populationCrossOver();
+  };
+
+  const handleAutomatedCrossover = () => {
+    setShow(!show);
+    for (let i = 0; i < 20; i++) {
+      populationCrossOver();
+      if (initialPopulation[0].fitness === 0) {
+        <Alert severity="success">SOLUTION FOUND!!!</Alert>;
+      }
+    }
+  };
+  const handleClear = () => {
+    setAncestorMatrix(null);
+    setinitialPopulation([]);
+    setPopulationSize(1);
+    setDisableGen(false);
   };
 
   const changeColor = (value: any) => {
@@ -217,8 +239,6 @@ const GA = () => {
     setDisableGen(false);
   };
 
-
-
   return (
     <div>
       <TextField label="Colors" variant="outlined" onChange={(e) => changeColor(e.target.value)} />
@@ -229,14 +249,22 @@ const GA = () => {
         Generate
       </Button>
 
-      <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" onClick={handleSolve}>
-        Next Iteration
-      </Button>
-
-      <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" onClick={handleCrossover}>
+      <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" color="success" onClick={handleCrossover}>
         Crossover
       </Button>
 
+      <Button
+        sx={{ paddingTop: 3, marginLeft: 5 }}
+        variant="contained"
+        color="success"
+        onClick={handleAutomatedCrossover}
+      >
+        Automated Crossover
+      </Button>
+
+      <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" color="error" onClick={handleClear}>
+        Clear All
+      </Button>
       {initialPopulation.length > 0 ? (
         <Table>
           <TableBody>
