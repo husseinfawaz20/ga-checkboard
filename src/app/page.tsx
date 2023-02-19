@@ -1,5 +1,5 @@
 "use client";
-import { Box, Button, Grid, Table, TableBody, TableCell, TableRow, TextField } from "@mui/material";
+import { Alert, Box, Button, Grid, Table, TableBody, TableCell, TableRow, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 const GA = () => {
@@ -96,9 +96,11 @@ const GA = () => {
   };
 
   const populationCrossOver = () => {
-    var ip = JSON.parse(JSON.stringify(initialPopulation));
-    const crosseOverPopulation = ip.slice(0, populationSize);
-    // console.log("crosseOverPopulation,",crosseOverPopulation)
+    let crosseOverPopulation = [];
+    for (let i = 0; i < populationSize; i++) {
+      crosseOverPopulation.push(initialPopulation[i]);
+    }
+    console.log("crosseOverPopulation,", crosseOverPopulation);
     for (let i = 0; i < crosseOverPopulation.length - 1; i++) {
       for (let j = i + 1; j < crosseOverPopulation.length; j++) {
         const checkBoard = coupleCrossOver(crosseOverPopulation[i], crosseOverPopulation[j]);
@@ -114,10 +116,13 @@ const GA = () => {
   const coupleCrossOver = (parent1, parent2) => {
     let child = [];
 
-    const crossOverPoint = Math.floor(Math.floor(Math.random() * parent1?.checkBoard.length));
-    let parent1Chr = parent1?.checkBoard.splice(0, crossOverPoint);
-    let parent2Chr = parent2?.checkBoard.splice(crossOverPoint, parent2?.checkBoard.length);
+    let parent1CheckBoard = [...parent1?.checkBoard];
+    let parent2CheckBoard = [...parent2?.checkBoard];
 
+    const crossOverPoint = Math.floor(Math.floor(Math.random() * parent1?.checkBoard.length));
+    let parent1Chr = parent1CheckBoard.splice(0, crossOverPoint);
+    let parent2Chr = parent2CheckBoard.splice(crossOverPoint, parent2?.checkBoard.length);
+    // console.log("p2:",parent2Chr)
     if (Math.random() > 0.5) {
       const tempParent = parent1Chr;
       parent1Chr = parent2Chr;
@@ -131,7 +136,9 @@ const GA = () => {
     }
 
     child = parent1Chr.concat(parent2Chr);
-    console.log(child)
+
+    // console.log("child:",child)
+
     let colors: number[] = new Array(colorNumber).fill((checkBoardSize * checkBoardSize) / colorNumber);
 
     for (let i = 0; i < checkBoardSize; i++)
@@ -186,7 +193,6 @@ const GA = () => {
     return child;
   };
 
-
   const permutate = (checkBoard) => {
     for (let i = 0; i < checkBoard.length - 1; i++) {
       for (let j = i + 1; j < checkBoard.length - 1; j++) {
@@ -215,16 +221,18 @@ const GA = () => {
 
   const handleAutomatedCrossover = () => {
     setShow(!show);
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 20; i++) {
       populationCrossOver();
-      // console.log("ip", initialPopulation);
-      if (initialPopulation[i].fitness === 0) break;
+      if (initialPopulation[0].fitness === 0) {
+        <Alert severity="success">SOLUTION FOUND!!!</Alert>;
+        break;
+      }
     }
   };
   const handleClear = () => {
     setAncestorMatrix(null);
     setinitialPopulation([]);
-    setchildrenPopulation([])
+    setchildrenPopulation([]);
     setDisableGen(false);
   };
 
@@ -232,14 +240,14 @@ const GA = () => {
     setColorNumber(value);
     setAncestorMatrix(null);
     setinitialPopulation([]);
-    setchildrenPopulation([])
+    setchildrenPopulation([]);
     setDisableGen(false);
   };
   const changeDimension = (value: any) => {
     setCheckBoardSize(value);
     setAncestorMatrix(null);
     setinitialPopulation([]);
-    setchildrenPopulation([])
+    setchildrenPopulation([]);
     setDisableGen(false);
   };
 
@@ -247,7 +255,7 @@ const GA = () => {
     setPopulationSize(value);
     setAncestorMatrix(null);
     setinitialPopulation([]);
-    setchildrenPopulation([])
+    setchildrenPopulation([]);
     setDisableGen(false);
   };
 
