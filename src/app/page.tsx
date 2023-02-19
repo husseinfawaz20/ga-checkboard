@@ -97,8 +97,8 @@ const GA = () => {
 
   const populationCrossOver = () => {
     var ip = JSON.parse(JSON.stringify(initialPopulation));
-    const crosseOverPopulation = ip.slice(0, 2);
-    console.log("crosseOverPopulation,",crosseOverPopulation)
+    const crosseOverPopulation = ip.slice(0, populationSize);
+    // console.log("crosseOverPopulation,",crosseOverPopulation)
     for (let i = 0; i < crosseOverPopulation.length - 1; i++) {
       for (let j = i + 1; j < crosseOverPopulation.length; j++) {
         const checkBoard = coupleCrossOver(crosseOverPopulation[i], crosseOverPopulation[j]);
@@ -131,20 +131,8 @@ const GA = () => {
     }
 
     child = parent1Chr.concat(parent2Chr);
-
+    console.log(child)
     let colors: number[] = new Array(colorNumber).fill((checkBoardSize * checkBoardSize) / colorNumber);
-    function count(array) {
-      return array
-        .flat()
-        .join(" ")
-        .split(" ")
-        .reduce((acc, word) => {
-          acc[word] = acc[word] !== undefined ? acc[word] + 1 : 1;
-          return acc;
-        }, {});
-    }
-
-    const color = count(child);
 
     for (let i = 0; i < checkBoardSize; i++)
       for (let j = 0; j < checkBoardSize; j++) {
@@ -229,7 +217,7 @@ const GA = () => {
     setShow(!show);
     for (let i = 0; i < 100; i++) {
       populationCrossOver();
-      console.log("ip", initialPopulation);
+      // console.log("ip", initialPopulation);
       if (initialPopulation[i].fitness === 0) break;
     }
   };
