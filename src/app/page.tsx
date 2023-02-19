@@ -110,9 +110,24 @@ const GA = () => {
 
   const coupleCrossOver = (parent1, parent2) => {
     let child = [];
-    const midpoint = Math.floor(parent1?.checkBoard.length / 2);
-    const parent1Chr = parent1?.checkBoard.splice(0, midpoint);
-    const parent2Chr = parent2?.checkBoard.splice(midpoint, parent2?.checkBoard.length);
+    
+    const crossOverPoint = Math.floor(Math.floor(Math.random() * parent1?.checkBoard.length));
+    let parent1Chr = parent1?.checkBoard.splice(0, crossOverPoint);
+    let parent2Chr = parent2?.checkBoard.splice(crossOverPoint, parent2?.checkBoard.length);
+    
+    if(Math.random()>0.5){
+      const tempParent=parent1Chr;
+      parent1Chr=parent2Chr;
+      parent2Chr=tempParent;
+    }
+    
+    // parent Permutation
+    if(Math.random()<0.1)
+    {
+      parent1Chr=permutate(parent1Chr);
+      parent2Chr=permutate(parent2Chr);
+    }
+
     child = parent1Chr.concat(parent2Chr);
 
     let colors: number[] = new Array(colorNumber).fill((checkBoardSize * checkBoardSize) / colorNumber);
@@ -181,6 +196,17 @@ const GA = () => {
     console.log(child)
     return child;
   };
+
+  const permutate = (checkBoard)=>{
+
+    for (let i = 0; i < checkBoard.length - 1; i++) {
+      for (let j = i + 1; j < checkBoard.length-1; j++) {
+        let temp=checkBoard[i][j];
+        checkBoard[i][j]=checkBoard[i+1][j+1];
+        checkBoard[i+1][j+1]=temp;
+      }
+    }    
+  }
 
   const handleStart = () => {
     ancestorInitialization();
