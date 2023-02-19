@@ -96,7 +96,7 @@ const GA = () => {
   const populationCrossOver = () => {
     var ip = JSON.parse(JSON.stringify(initialPopulation));
     const crosseOverPopulation = ip.slice(0, 2);
-
+     console.log("cr",crosseOverPopulation)
     for (let i = 0; i < crosseOverPopulation.length - 1; i++) {
       for (let j = i + 1; j < crosseOverPopulation.length; j++) {
         const checkBoard = coupleCrossOver(crosseOverPopulation[i], crosseOverPopulation[j]);
@@ -178,6 +178,7 @@ const GA = () => {
         }
       }
     }
+    console.log(child)
     return child;
   };
 
@@ -189,6 +190,11 @@ const GA = () => {
   const handleSolve = () => {
     setShow(!show);
     generateInitialPopulation(ancestorMatrix);
+  };
+
+  const handleCrossover = () => {
+    setShow(!show);
+    populationCrossOver();
   };
 
   const changeColor = (value: any) => {
@@ -211,12 +217,7 @@ const GA = () => {
     setDisableGen(false);
   };
 
-  const handleCrossover = () => {
-    setShow(!show);
 
-    populationCrossOver();
-    generateInitialPopulation(ancestorMatrix);
-  };
 
   return (
     <div>
