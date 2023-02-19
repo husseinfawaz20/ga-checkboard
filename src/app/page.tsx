@@ -182,14 +182,33 @@ const GA = () => {
       for (let i = 0; i < child.length; i++) {
         for (let j = 0; j < child[i].length; j++) {
           if (colors[child[i][j!]] < 0) {
+            let secondRound = false;
             for (let index = 0; index < colors.length; index++) {
-              const ind = j;
-              console.log("child i j", child[i][ind!], i, j, child);
-              if (index != child[i][ind!] && colors[index] > 0) {
-                colors[child[i][ind!]]++;
-                colors[index]--;
-                child[i][ind] = index;
+              if (index != child[i][j] && colors[index] > 0) {
+                let neighbors = [];
+                if (i != 0) {
+                  neighbors.push(child[i - 1][j]);
+                }
+                if (i != child.length - 1) {
+                  neighbors.push(child[i + 1][j]);
+                }
+                if (j != 0) {
+                  neighbors.push(child[i][j - 1]);
+                }
+                if (j != child[i].length - 1) {
+                  neighbors.push(child[i][j + 1]);
+                }
+                if (neighbors.includes(index) || secondRound) {
+                  colors[child[i][j]]++;
+                  colors[index]--;
+                  child[i][j] = index;
+                }
                 break;
+              }
+
+              if (index == colors.length - 1 && secondRound == false) {
+                index = 0;
+                secondRound = false;
               }
             }
           }
@@ -230,7 +249,10 @@ const GA = () => {
   };
 
   const handleCrossover = () => {
+    setShow(!show);
+
     populationCrossOver();
+    generateInitialPopulation(ancestorMatrix);
   };
 
   return (
