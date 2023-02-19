@@ -205,7 +205,8 @@ const GA = () => {
         checkBoard[i][j]=checkBoard[i+1][j+1];
         checkBoard[i+1][j+1]=temp;
       }
-    }    
+    }
+    return checkBoard;
   }
 
   const handleStart = () => {
