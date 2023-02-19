@@ -6,11 +6,10 @@ const GA = () => {
   const [checkBoardSize, setCheckBoardSize] = useState<number>(5);
   const [colorNumber, setColorNumber] = useState<number>(5);
   const [initialPopulation, setinitialPopulation] = useState<any[]>([]);
-  const [childrenPopulation, setchildrenPopulation] = useState<any[]>([]);
   const [ancestorMatrix, setAncestorMatrix] = useState<any>();
   const [show, setShow] = useState<boolean>(true);
   const [disableGen, setDisableGen] = useState<boolean>(false);
-  const [populationSize, setPopulationSize] = useState<number>(1);
+  const [populationSize, setPopulationSize] = useState<number>(2);
 
   const ancestorInitialization = () => {
     let i, j;
@@ -33,8 +32,6 @@ const GA = () => {
           }
         }
       }
-      // console.log(ancestor);
-
       generateInitialPopulation(ancestor);
       setAncestorMatrix(ancestor);
     } else {
@@ -45,11 +42,9 @@ const GA = () => {
   const generateInitialPopulation = (ancestor: any) => {
     for (let index = 0; index < populationSize; index++) {
       initialPopulation.push(getRandomcheckBoard(ancestor));
-      childrenPopulation.push(getRandomcheckBoard(ancestor));
     }
 
     initialPopulation.sort((a, b) => a.fitness - b.fitness);
-    childrenPopulation.sort((a, b) => a.fitness - b.fitness);
   };
 
   const getRandomcheckBoard = (ancestorMatrix: any) => {
@@ -100,29 +95,25 @@ const GA = () => {
     for (let i = 0; i < populationSize; i++) {
       crosseOverPopulation.push(initialPopulation[i]);
     }
-    console.log("crosseOverPopulation,", crosseOverPopulation);
+    // console.log("crosseOverPopulation,", crosseOverPopulation);
     for (let i = 0; i < crosseOverPopulation.length - 1; i++) {
       for (let j = i + 1; j < crosseOverPopulation.length; j++) {
         const checkBoard = coupleCrossOver(crosseOverPopulation[i], crosseOverPopulation[j]);
         const fitness = getFitness(checkBoard);
         initialPopulation.push({ checkBoard, fitness });
-        childrenPopulation.push({ checkBoard, fitness });
       }
     }
     initialPopulation.sort((a, b) => a.fitness - b.fitness);
-    childrenPopulation.sort((a, b) => a.fitness - b.fitness);
   };
 
   const coupleCrossOver = (parent1, parent2) => {
     let child = [];
-
-    let parent1CheckBoard = [...parent1?.checkBoard];
-    let parent2CheckBoard = [...parent2?.checkBoard];
+    let parent1CheckBoard: any = JSON.parse(JSON.stringify(parent1));
+    let parent2CheckBoard: any = JSON.parse(JSON.stringify(parent2));
 
     const crossOverPoint = Math.floor(Math.floor(Math.random() * parent1?.checkBoard.length));
-    let parent1Chr = parent1CheckBoard.splice(0, crossOverPoint);
-    let parent2Chr = parent2CheckBoard.splice(crossOverPoint, parent2?.checkBoard.length);
-    // console.log("p2:",parent2Chr)
+    let parent1Chr = parent1CheckBoard?.checkBoard.splice(0, crossOverPoint);
+    let parent2Chr = parent2CheckBoard?.checkBoard.splice(crossOverPoint, parent2?.checkBoard.length);
     if (Math.random() > 0.5) {
       const tempParent = parent1Chr;
       parent1Chr = parent2Chr;
@@ -136,8 +127,6 @@ const GA = () => {
     }
 
     child = parent1Chr.concat(parent2Chr);
-
-    // console.log("child:",child)
 
     let colors: number[] = new Array(colorNumber).fill((checkBoardSize * checkBoardSize) / colorNumber);
 
@@ -209,11 +198,6 @@ const GA = () => {
     setDisableGen(true);
   };
 
-  const handleSolve = () => {
-    setShow(!show);
-    generateInitialPopulation(ancestorMatrix);
-  };
-
   const handleCrossover = () => {
     setShow(!show);
     populationCrossOver();
@@ -225,14 +209,13 @@ const GA = () => {
       populationCrossOver();
       if (initialPopulation[0].fitness === 0) {
         <Alert severity="success">SOLUTION FOUND!!!</Alert>;
-        break;
       }
     }
   };
   const handleClear = () => {
     setAncestorMatrix(null);
     setinitialPopulation([]);
-    setchildrenPopulation([]);
+    setPopulationSize(1);
     setDisableGen(false);
   };
 
@@ -240,14 +223,12 @@ const GA = () => {
     setColorNumber(value);
     setAncestorMatrix(null);
     setinitialPopulation([]);
-    setchildrenPopulation([]);
     setDisableGen(false);
   };
   const changeDimension = (value: any) => {
     setCheckBoardSize(value);
     setAncestorMatrix(null);
     setinitialPopulation([]);
-    setchildrenPopulation([]);
     setDisableGen(false);
   };
 
@@ -255,7 +236,6 @@ const GA = () => {
     setPopulationSize(value);
     setAncestorMatrix(null);
     setinitialPopulation([]);
-    setchildrenPopulation([]);
     setDisableGen(false);
   };
 
@@ -267,10 +247,6 @@ const GA = () => {
 
       <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" onClick={handleStart} disabled={disableGen}>
         Generate
-      </Button>
-
-      <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" onClick={handleSolve}>
-        Next Iteration
       </Button>
 
       <Button sx={{ paddingTop: 3, marginLeft: 5 }} variant="contained" color="success" onClick={handleCrossover}>
